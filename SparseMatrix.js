@@ -82,7 +82,7 @@ class SparseMatrix {
 
     multiply(matrix) {
         if (this.rows !== matrix.rows || this.cols !== matrix.cols) {
-            throw new Error("Matrices must have the same dimensions for addition to perfom");
+            throw new Error("Matrices must have the same dimensions for multiplication to perfom");
         }
 
         const result = new SparseMatrix(this.rows, this.cols);
