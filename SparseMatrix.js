@@ -38,7 +38,7 @@ class SparseMatrix {
 
     add(matrix) {
         if (this.rows !== matrix.rows || this.cols !== matrix.cols) {
-            throw new Error("Matrices must have the same dimensions for addition");
+            throw new Error("Matrices must have the same dimensions for addition to perfom");
         }
 
         const result = new SparseMatrix(this.rows, this.cols);
@@ -60,7 +60,7 @@ class SparseMatrix {
 
     subtract(matrix) {
         if (this.rows !== matrix.rows || this.cols !== matrix.cols) {
-            throw new Error("Matrices must have the same dimensions for subtraction");
+            throw new Error("Matrices must have the same dimensions for subtraction to perfom");
         }
 
         const result = new SparseMatrix(this.rows, this.cols);
@@ -82,7 +82,7 @@ class SparseMatrix {
 
     multiply(matrix) {
         if (this.rows !== matrix.rows || this.cols !== matrix.cols) {
-            throw new Error("Matrices must have the same dimensions for addition");
+            throw new Error("Matrices must have the same dimensions for addition to perfom");
         }
 
         const result = new SparseMatrix(this.rows, this.cols);
