@@ -6,7 +6,7 @@ A JavaScript implementation of a sparse matrix with support for addition, subtra
 Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/sparsematrix.git
+git clone https://github.com/jkeza1/sparsematrix.git
 ```
 ```bash
 cd sparsematrix
@@ -46,15 +46,22 @@ cols=3
 
 # Functions
 `SparseMatrix` 
-constructor(rows, cols): Initializes a new sparse matrix with the given number of rows and columns.
-static fromFile(filePath): Reads a sparse matrix from a file and returns a SparseMatrix instance.
-getElement(row, col): Returns the value at the specified row and column.
-setElement(row, col, value): Sets the value at the specified row and column.
-add(matrix): Adds the current matrix with another matrix and returns the result.
-subtract(matrix): Subtracts another matrix from the current matrix and returns the result.
-multiply(matrix): Multiplies the current matrix with another matrix and returns the result.
-toString(): Returns a string representation of the matrix.
+- `constructor(rows, cols):` Initializes a new sparse matrix with the given number of rows and columns.
 
-AUTHOR
+- `static fromFile(filePath):` Reads a sparse matrix from a file and returns a SparseMatrix instance.
+
+- `getElement(row, col):` Returns the value at the specified row and column.
+
+- `setElement(row, col, value):` Sets the value at the specified row and column.
+
+- `add(matrix):` Adds the current matrix with another matrix and returns the result.
+
+- `subtract(matrix):` Subtracts another matrix from the current matrix and returns the result.
+
+- `multiply(matrix):` Multiplies the current matrix with another matrix and returns the result.
+
+- `toString():` Returns a string representation of the matrix.
+
+# AUTHOR
 Joan keza
 
