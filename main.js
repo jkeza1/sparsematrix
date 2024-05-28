@@ -36,7 +36,7 @@ function promptUser() {
                     console.log("Result:");
                     console.log(result.toString());
 
-                    const outputDir = './output';
+                    const outputDir = './results';
                     if (!fs.existsSync(outputDir)) {
                         fs.mkdirSync(outputDir);
                     }
