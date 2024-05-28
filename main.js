@@ -1,5 +1,6 @@
 const readline = require('readline');
 const fs = require('fs');
+const path = require('path');
 const SparseMatrix = require('./SparseMatrix');
 
 const rl = readline.createInterface({
@@ -34,6 +35,15 @@ function promptUser() {
 
                     console.log("Result:");
                     console.log(result.toString());
+
+                    const outputDir = './output';
+                    if (!fs.existsSync(outputDir)) {
+                        fs.mkdirSync(outputDir);
+                    }
+
+                    const outputFile = path.join(outputDir, 'result.txt');
+                    fs.writeFileSync(outputFile, result.toString(), 'utf8');
+                    console.log(`Result saved to ${outputFile}`);
                 } catch (error) {
                     console.error(error.message);
                 }
