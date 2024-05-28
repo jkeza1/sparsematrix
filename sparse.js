@@ -1,66 +1,119 @@
 const fs = require('fs');
 
 class SparseMatrix {
-    constructor(rows, cols) {
-        this.rows = rows;
-        this.cols = cols;
-        this.data = Array.from({ length: rows }, () => Array(cols).fill(0));
+    constructor(arg1, arg2) {
+        if (typeof arg1 === 'string') {
+            this._loadFromFile(arg1);
+        } else if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+            this._initialize(arg1, arg2);
+        } else {
+            throw new Error("Invalid constructor arguments");
+        }
     }
 
-    setValue(row, col, value) {
-        if (row < 0 || row >= this.rows || col < 0 || col >= this.cols)
-            throw new RangeError("Index out of range");
-        this.data[row][col] = value;
+    _initialize(numRows, numCols) {
+        this.numRows = numRows;
+        this.numCols = numCols;
+        this.data = {}; // Dictionary to store non-zero elements
     }
 
-    getValue(row, col) {
-        if (row < 0 || row >= this.rows || col < 0 || col >= this.cols)
+    _loadFromFile(matrixFilePath) {
+        const data = fs.readFileSync(matrixFilePath, 'utf8');
+        const lines = data.trim().split('\n');
+
+        const [numRows, numCols] = lines[0].split(' ').map(Number);
+        this._initialize(numRows, numCols);
+
+        for (let i = 1; i < lines.length; i++) {
+            const [row, col, value] = lines[i].split(' ').map(Number);
+            this.setElement(row, col, value);
+        }
+    }
+
+    getElement(currRow, currCol) {
+        if (currRow < 0 || currRow >= this.numRows || currCol < 0 || currCol >= this.numCols) {
             throw new RangeError("Index out of range");
-        return this.data[row][col];
+        }
+        return this.data[`${currRow},${currCol}`] || 0;
+    }
+
+    setElement(currRow, currCol, value) {
+        if (currRow < 0 || currRow >= this.numRows || currCol < 0 || currCol >= this.numCols) {
+            throw new RangeError("Index out of range");
+        }
+        if (value !== 0) {
+            this.data[`${currRow},${currCol}`] = value;
+        } else {
+            delete this.data[`${currRow},${currCol}`];
+        }
     }
 
     print() {
-        this.data.forEach(row => console.log(row.join(' ')));
+        for (let i = 0; i < this.numRows; i++) {
+            let row = [];
+            for (let j = 0; j < this.numCols; j++) {
+                row.push(this.getElement(i, j));
+            }
+            console.log(row.join(' '));
+        }
     }
 
     static add(a, b) {
-        if (a.rows !== b.rows || a.cols !== b.cols)
+        if (a.numRows !== b.numRows || a.numCols !== b.numCols) {
             throw new Error("Matrices dimensions must agree for addition.");
+        }
 
-        let result = new SparseMatrix(a.rows, a.cols);
-        for (let i = 0; i < a.rows; i++) {
-            for (let j = 0; j < a.cols; j++) {
-                result.setValue(i, j, a.getValue(i, j) + b.getValue(i, j));
+        let result = new SparseMatrix(a.numRows, a.numCols);
+        for (let key in a.data) {
+            result.data[key] = a.data[key];
+        }
+        for (let key in b.data) {
+            if (result.data[key]) {
+                result.data[key] += b.data[key];
+            } else {
+                result.data[key] = b.data[key];
             }
         }
         return result;
     }
 
     static subtract(a, b) {
-        if (a.rows !== b.rows || a.cols !== b.cols)
+        if (a.numRows !== b.numRows || a.numCols !== b.numCols) {
             throw new Error("Matrices dimensions must agree for subtraction.");
+        }
 
-        let result = new SparseMatrix(a.rows, a.cols);
-        for (let i = 0; i < a.rows; i++) {
-            for (let j = 0; j < a.cols; j++) {
-                result.setValue(i, j, a.getValue(i, j) - b.getValue(i, j));
+        let result = new SparseMatrix(a.numRows, a.numCols);
+        for (let key in a.data) {
+            result.data[key] = a.data[key];
+        }
+        for (let key in b.data) {
+            if (result.data[key]) {
+                result.data[key] -= b.data[key];
+            } else {
+                result.data[key] = -b.data[key];
             }
         }
         return result;
     }
 
     static multiply(a, b) {
-        if (a.cols !== b.rows)
+        if (a.numCols !== b.numRows) {
             throw new Error("Matrices dimensions must agree for multiplication.");
+        }
 
-        let result = new SparseMatrix(a.rows, b.cols);
-        for (let i = 0; i < a.rows; i++) {
-            for (let j = 0; j < b.cols; j++) {
-                let sum = 0;
-                for (let k = 0; k < a.cols; k++) {
-                    sum += a.getValue(i, k) * b.getValue(k, j);
+        let result = new SparseMatrix(a.numRows, b.numCols);
+        for (let keyA in a.data) {
+            const [rowA, colA] = keyA.split(',').map(Number);
+            for (let colB = 0; colB < b.numCols; colB++) {
+                const keyB = `${colA},${colB}`;
+                if (b.data[keyB]) {
+                    const keyResult = `${rowA},${colB}`;
+                    if (result.data[keyResult]) {
+                        result.data[keyResult] += a.data[keyA] * b.data[keyB];
+                    } else {
+                        result.data[keyResult] = a.data[keyA] * b.data[keyB];
+                    }
                 }
-                result.setValue(i, j, sum);
             }
         }
         return result;
@@ -70,19 +123,19 @@ class SparseMatrix {
         const data = fs.readFileSync(filename, 'utf8');
         const lines = data.trim().split('\n');
 
-        const [rows, cols] = lines[0].split(' ').map(Number);
-        if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
+        const [numRows, numCols] = lines[0].split(' ').map(Number);
+        if (isNaN(numRows) || isNaN(numCols) || numRows <= 0 || numCols <= 0) {
             throw new Error("Input file has wrong format");
         }
 
-        let matrix = new SparseMatrix(rows, cols);
+        let matrix = new SparseMatrix(numRows, numCols);
 
         for (let i = 1; i < lines.length; i++) {
             const [row, col, value] = lines[i].split(' ').map(Number);
             if (isNaN(row) || isNaN(col) || isNaN(value)) {
                 throw new Error("Input file has wrong format");
             }
-            matrix.setValue(row, col, value);
+            matrix.setElement(row, col, value);
         }
 
         return matrix;
@@ -90,14 +143,10 @@ class SparseMatrix {
 }
 
 function saveToFile(matrix, filename) {
-    let data = `${matrix.rows} ${matrix.cols}\n`;
-    for (let i = 0; i < matrix.rows; i++) {
-        for (let j = 0; j < matrix.cols; j++) {
-            let value = matrix.getValue(i, j);
-            if (value !== 0) {
-                data += `${i} ${j} ${value}\n`;
-            }
-        }
+    let data = `${matrix.numRows} ${matrix.numCols}\n`;
+    for (let key in matrix.data) {
+        const [row, col] = key.split(',').map(Number);
+        data += `${row} ${col} ${matrix.data[key]}\n`;
     }
     fs.writeFileSync(filename, data, 'utf8');
 }
@@ -130,17 +179,5 @@ function saveToFile(matrix, filename) {
                 break;
             case 'multiply':
                 result = SparseMatrix.multiply(matrix1, matrix2);
-                break;
-            default:
-                throw new Error("Invalid operation");
-        }
-
-        saveToFile(result, outputFile);
-        console.log(`Operation successful. Result saved to ${outputFile}`);
-    } catch (e) {
-        console.error(`Error: ${e.message}`);
-    } finally {
-        rl.close();
-    }
-})();
+                break
 
